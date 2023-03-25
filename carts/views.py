@@ -3,7 +3,7 @@ from .models import Cart,CartItem
 from store.models import Product
 # Create your views here.
 from django.http import HttpResponse
-
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def _cart_id(request):
@@ -67,7 +67,7 @@ def cart(request,total=0,quantity=0,cart_item=None):
         tax =(2 *total)/100
         grand_total=total+tax
     
-    except DoesNotExist:
+    except ObjectDoesNotExist:
         pass
     
     context={
@@ -79,3 +79,13 @@ def cart(request,total=0,quantity=0,cart_item=None):
     }
 
     return render(request,'store/cart.html',context)
+
+
+
+
+
+
+
+
+
+
