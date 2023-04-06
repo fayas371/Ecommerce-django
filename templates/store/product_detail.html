@@ -18,6 +18,14 @@
 	</div> <!-- img-big-wrap.// -->
 	
 </article> <!-- gallery-wrap .end// -->
+<ul class="thumb">
+	<li>
+		<a href="{{ single_product.image.url }}" target="mainImage"><img src="{{ single_product.image.url }}" alt="Product Image"></a>
+		{% for i in productgallery %}
+		<a href="{{i.image.url}}" target="mainImage"><img src="{{i.image.url}}" alt="Product Image"></a>
+		{% endfor %}
+	</li>
+</ul>
 		</aside>
 		<main class="col-md-6 border-left">
 <article class="content-body">
@@ -199,6 +207,48 @@
 </div> <!-- row.// -->
 
 
+
 </div> <!-- container .//  -->
 </section>
+<div class="container">
+	<div class="row">
+{% for categ in category_products %}
+
+<div class="col-md-4">
+	
+	<figure class="card card-product-grid">
+		<div class="img-wrap"> 
+			<a href="{{categ.get_url}}">
+			<img src="{{categ.image.url}}">
+			</a>
+		</div> <!-- img-wrap.// -->
+		<figcaption class="info-wrap">
+			<div class="fix-height">
+				<a href="{{categ.get_url}}" class="title">{{categ.product_name}}</a>
+				<div class="price-wrap mt-2">
+					<span class="price">{{categ.price}}</span>
+				   
+				</div> <!-- price-wrap.// -->
+				<div class="rating-star">
+					<span>
+						<i class="fa fa-star{% if categ.averageReview < 0.5 %}-o{% elif categ.averageReview >= 0.5 and product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if categ.averageReview < 1.5 %}-o{% elif categ.averageReview >= 1.5 and product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if categ.averageReview < 2.5 %}-o{% elif categ.averageReview >= 2.5 and product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if categ.averageReview < 3.5 %}-o{% elif categ.averageReview >= 3.5 and product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if categ.averageReview < 4.5 %}-o{% elif categ.averageReview >= 4.5 and product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
+						</span>
+				</div>
+			</div>
+			<a href="{{categ.get_url}}" class="btn btn-block btn-primary">View Details </a>
+		</figcaption>
+	</figure>
+</div>
+
+{% endfor %}
+</div>
+</div> <!-- col.// -->
+
+
+
+
 {% endblock %}

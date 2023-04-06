@@ -1,5 +1,5 @@
 from django.shortcuts import render,get_object_or_404,redirect
-from .models import Product,ReviewRating
+from .models import Product,ReviewRating,ProductGallery
 from category.models import Category
 from carts.models import CartItem
 from carts.views import _cart_id
@@ -10,9 +10,12 @@ from .forms import ReviewForm
 from django.core.mail import EmailMessage
 from django.contrib import messages
 from orders.models import OrderProduct
+
 # Create your views here.
 
 def store(request,category_slug=None):
+    
+    
     categories  = None
     products    = None
 
@@ -35,6 +38,7 @@ def store(request,category_slug=None):
     context={
         'products': paged_products,
         'product_count':product_count,
+    
         
     }
     return render(request,'store/store.html',context)
@@ -42,10 +46,11 @@ def store(request,category_slug=None):
 
 
 def product_detail(request,category_slug,product_slug):
+    
     try:
         single_product  = Product.objects.get(category__slug=category_slug,slug=product_slug)
         in_cart         = CartItem.objects.filter(cart__cart_id=_cart_id(request),product=single_product).exists()
-        
+        category_products=Product.objects.filter(category=single_product.category)
     
     except Exception as e:
         raise e
@@ -62,12 +67,17 @@ def product_detail(request,category_slug,product_slug):
     #get the reviews
     reviews=ReviewRating.objects.filter(product_id=single_product.id,status=True)
 
+    #get Product photos
+    productgallery=ProductGallery.objects.filter(product_id=single_product.id)
+
 
     context={
         'single_product':single_product,
         'in_cart':in_cart,
         'orderproduct':orderproduct,
         'reviews':reviews,
+        'productgallery':productgallery,
+        'category_products':category_products,
     }
     return render(request,'store/product_detail.html',context)
 

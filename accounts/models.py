@@ -48,6 +48,13 @@ class Account(AbstractBaseUser):
     username    =   models.CharField(max_length=100)
     email       =   models.CharField(max_length=100,unique=True)
     phone_no    =   models.CharField(max_length=50)
+    address_line_1 = models.CharField(blank=True, max_length=100)
+    address_line_2 = models.CharField(blank=True, max_length=100)
+    
+    city = models.CharField(blank=True, max_length=20)
+    state = models.CharField(blank=True, max_length=20)
+    country = models.CharField(blank=True, max_length=20)
+    
 
 
     #required
@@ -77,3 +84,14 @@ class Account(AbstractBaseUser):
     
     def has_module_perms(self,add_label):
         return True
+    
+class Contact(models.Model):
+    name=models.CharField(max_length=50)
+    email=models.EmailField()
+    desc=models.TextField(max_length=500)
+    phonenumber=models.IntegerField()
+
+    def __str__(self):
+        return self.name
+
+    

@@ -1,9 +1,11 @@
-from django.shortcuts import render,redirect
-from .forms import RegistrationForm
-from .models import Account
+from django.shortcuts import render,redirect,get_object_or_404
+from .forms import RegistrationForm,UserForm
+from .models import Account,Contact
+
 from django.contrib import messages,auth
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from orders.models import Order,OrderProduct
 # Create your views here.
 #verification email
 from django.contrib.sites.shortcuts import get_current_site
@@ -93,9 +95,21 @@ def activate(request,uidb64,token):
     else:
         messages.error(request,'Invalid activation link')
         return redirect('register')
-@login_required(login_url='login')    
+
+@login_required(login_url = 'login')
 def dashboard(request):
-    return render(request,'accounts/dashboard.html')
+    orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
+    orders_count = orders.count()
+    
+    
+    context = {
+        'orders_count': orders_count,
+        
+        
+    }
+    return render(request, 'accounts/dashboard.html', context)
+
+
 
 def forgotPassword(request):
     if request.method=='POST':
@@ -151,3 +165,86 @@ def resetPassword(request):
             return redirect('resetPassword')
     else:
         return render(request,'accounts/resetPassword.html')
+    
+
+def myorders(request):
+    orders=Order.objects.filter(user=request.user,is_ordered=True).order_by('-created_at')
+    context={
+        'orders':orders
+    }
+    return render(request,'accounts/myorders.html',context)
+
+
+
+
+
+@login_required(login_url='login')
+def change_password(request):
+    if request.method == 'POST':
+        current_password = request.POST['current_password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+
+        user = Account.objects.get(username__exact=request.user.username)
+
+        if new_password == confirm_password:
+            success = user.check_password(current_password)
+            if success:
+                user.set_password(new_password)
+                user.save()
+                # auth.logout(request)
+                messages.success(request, 'Password updated successfully.')
+                return redirect('change_password')
+            else:
+                messages.error(request, 'Please enter valid current password')
+                return redirect('change_password')
+        else:
+            messages.error(request, 'Password does not match!')
+            return redirect('change_password')
+    return render(request, 'accounts/change_password.html')
+
+
+@login_required(login_url='login')
+def order_detail(request, order_id):
+    order_detail = OrderProduct.objects.filter(order__order_number=order_id)
+    order = Order.objects.get(order_number=order_id)
+    subtotal = 0
+    for i in order_detail:
+        subtotal += i.product_price * i.quantity
+
+    context = {
+        'order_detail': order_detail,
+        'order': order,
+        'subtotal': subtotal,
+    }
+    return render(request, 'accounts/order_detail.html', context)
+
+
+def editprofile(request):
+    userprofile = UserForm(request.POST)
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user)
+        if user_form.is_valid():
+            user_form.save()
+            messages.success(request, 'Your Details has been updated.')
+    else:
+        user_form = UserForm(instance=request.user)
+        
+    context = {
+        'user_form': user_form,
+        
+        'userprofile': userprofile,
+    }
+    return render(request,'accounts/edit_profile.html',context)
+
+def contact_us(request):
+    if request.method=="POST":
+        name=request.POST['name']
+        email=request.POST['email']
+        desc=request.POST['content']
+        pnumber=request.POST['pnumber']
+        myquery=Contact(name=name,email=email,desc=desc,phonenumber=pnumber)
+        myquery.save()
+        messages.info(request,'Thank you for contacting us we will get back to you soon')
+        return render(request,'contact.html')
+    return render(request,'contact.html')

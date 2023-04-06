@@ -19,3 +19,4 @@ class Category(models.Model):
 
     def get_url(self):
         return reverse('products_by_category',args=[self.slug])
+    
